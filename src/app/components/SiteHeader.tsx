@@ -3,12 +3,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/app/lib/cn";
+import CartIndicator from "@/app/components/CartIndicator"; 
 
 export default function SiteHeader() {
   const pathname = usePathname();
   const [q, setQ] = useState("");
 
-  const Nav = ({ href, children }: { href: string; children: React.ReactNode }) => (
+  const Nav = ({
+    href,
+    children,
+  }: {
+    href: string;
+    children: React.ReactNode;
+  }) => (
     <Link
       href={href}
       className={cn(
@@ -23,11 +30,15 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
       <div className="container mx-auto max-w-6xl px-4 h-14 flex items-center gap-3">
-        <Link href="/" className="font-bold">Shoply</Link>
+        <Link href="/" className="font-bold">
+          Shoply
+        </Link>
         <nav className="flex gap-2 ml-auto">
           <Nav href="/shop">Shop</Nav>
-          <Nav href="/cart">Cart</Nav>
+          <CartIndicator/>
           <Nav href="/admin">Admin</Nav>
+          <Nav href="/login">Login</Nav>
+          <Nav href="/register">Register</Nav>
         </nav>
         <div className="hidden md:flex items-center gap-2">
           <input
