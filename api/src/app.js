@@ -3,11 +3,13 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
+const ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
 // ===== App =====
 const app = express();
 
-app.set("trust proxy", 1);
+app.use(cors({ origin: ORIGIN, credentials: false }));
 
+app.set("trust proxy", 1);
 
 
 // Security headers
@@ -37,6 +39,12 @@ app.use("/api/v1/auth", authRouter);
 
 const productsRouter = require("./routes/products.router");//...
 app.use("/api/v1/products", productsRouter);//...
+
+
+const ordersRouter = require("./routes/orders.router");
+
+app.use("/api/v1/products", productsRouter);
+app.use("/api/v1/orders", ordersRouter);
 
 // API prefix v1
 const api = express.Router();

@@ -1,26 +1,23 @@
 const { verifyToken } = require("../lib/auth");
-const { User } = require("../models/user.model");
 
-async function requireAuth(req, res, next) {
+function requireAuth(req, res, next) {
+  const h = req.headers.authorization || "";
+  const [, token] = h.split(" ");
+  if (!token) return res.status(401).json({ ok: false, error: { code: "UNAUTHORIZED", message: "Missing token" } });
   try {
-    const hdr = req.headers.authorization || "";
-    const [, token] = hdr.split(" ");
-    if (!token) return res.status(401).json({ ok: false, error: { code: "UNAUTHORIZED", message: "Missing token" } });
     const payload = verifyToken(token);
-    const user = await User.findById(payload.sub).lean();
-    if (!user) return res.status(401).json({ ok: false, error: { code: "UNAUTHORIZED", message: "User not found" } });
-    req.user = { id: String(user._id), role: user.role, name: user.name, email: user.email };
+    req.user = payload;
     next();
-  } catch (err) {
-    err.status = 401;
-    next(err);
+  } catch (e) {
+    return res.status(401).json({ ok: false, error: { code: "UNAUTHORIZED", message: "Invalid token" } });
   }
 }
 
-function requireRole(...roles) {
+function requireRole(role) {
   return (req, res, next) => {
-    if (!req.user) return res.status(401).json({ ok: false, error: { code: "UNAUTHORIZED", message: "Login required" } });
-    if (!roles.includes(req.user.role)) return res.status(403).json({ ok: false, error: { code: "FORBIDDEN", message: "Insufficient role" } });
+    if (!req.user || req.user.role !== role) {
+      return res.status(403).json({ ok: false, error: { code: "FORBIDDEN", message: "Insufficient role" } });
+    }
     next();
   };
 }
